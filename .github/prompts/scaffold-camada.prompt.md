@@ -2,7 +2,7 @@
 description: Cria uma camada completa do backend (route, controller, service, repository) para um recurso.
 name: scaffold-camada
 argument-hint: nome do recurso (ex. documents)
-agent: agent
+agent: agent 
 ---
 
 # Scaffold de camada do backend
