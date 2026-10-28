@@ -5,8 +5,6 @@ const path = require('node:path');
 const app = require('../src/app');
 const { storageDirectory } = require('../src/config/storage');
 
-// Teste de fumaça do seed: garante que o app Express foi exportado.
-// Novos testes serão adicionados durante os Steps 2, 6 e 7 com auxílio do Copilot.
 test('o app backend é exportado', () => {
   assert.ok(app, 'o app deve estar definido');
   assert.strictEqual(typeof app, 'function', 'o app Express deve ser uma função');
@@ -54,6 +52,11 @@ test('a API envia, lista e baixa documentos', async () => {
     assert.strictEqual(downloadResponse.status, 200);
     assert.match(downloadResponse.headers.get('content-disposition'), /attachment/);
     assert.strictEqual(await downloadResponse.text(), 'conteudo de teste');
+
+    await fs.rm(path.join(storageDirectory, uploadedId));
+    const missingStoredFile = await fetch(`${baseUrl}/documents/${uploadedId}/download`);
+    assert.strictEqual(missingStoredFile.status, 404);
+    assert.strictEqual((await missingStoredFile.json()).error.code, 'DOCUMENT_NOT_FOUND');
 
     const unknownDocument = await fetch(`${baseUrl}/documents/not-found/download`);
     assert.strictEqual(unknownDocument.status, 404);

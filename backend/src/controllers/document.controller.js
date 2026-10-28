@@ -1,4 +1,3 @@
-const fs = require('node:fs/promises');
 const documentService = require('../services/document.service');
 
 function sendError(res, status, code, message) {
@@ -14,7 +13,7 @@ async function upload(req, res) {
     const document = documentService.createDocument(req.file);
     return res.status(201).json(documentService.toPublicDocument(document));
   } catch {
-    await fs.unlink(req.file.path).catch(() => {});
+    await documentService.removeStoredFile(req.file.filename).catch(() => {});
     return sendError(res, 500, 'UPLOAD_FAILED', 'Não foi possível armazenar o documento.');
   }
 }
@@ -30,7 +29,7 @@ function list(_req, res) {
   }
 }
 
-async function download(req, res) {
+function download(req, res) {
   try {
     const document = documentService.findDocument(req.params.id);
     if (!document) {
@@ -38,32 +37,25 @@ async function download(req, res) {
     }
 
     const filePath = documentService.getDocumentPath(document);
-    await fs.access(filePath);
-
     return res.download(
       filePath,
       document.originalName,
       { headers: { 'Content-Type': 'application/octet-stream' } },
       (error) => {
-        if (error && !res.headersSent) {
-          const notFound = error.code === 'ENOENT';
-          sendError(
-            res,
-            notFound ? 404 : 500,
-            notFound ? 'DOCUMENT_NOT_FOUND' : 'DOWNLOAD_FAILED',
-            notFound ? 'Documento não encontrado.' : 'Não foi possível baixar o documento.'
-          );
-        }
+        if (!error) return;
+        if (res.headersSent) return res.destroy(error);
+
+        const notFound = error.code === 'ENOENT';
+        return sendError(
+          res,
+          notFound ? 404 : 500,
+          notFound ? 'DOCUMENT_NOT_FOUND' : 'DOWNLOAD_FAILED',
+          notFound ? 'Documento não encontrado.' : 'Não foi possível baixar o documento.'
+        );
       }
     );
   } catch (error) {
-    const notFound = error.code === 'ENOENT';
-    return sendError(
-      res,
-      notFound ? 404 : 500,
-      notFound ? 'DOCUMENT_NOT_FOUND' : 'DOWNLOAD_FAILED',
-      notFound ? 'Documento não encontrado.' : 'Não foi possível baixar o documento.'
-    );
+    return sendError(res, 500, 'DOWNLOAD_FAILED', 'Não foi possível baixar o documento.');
   }
 }
 

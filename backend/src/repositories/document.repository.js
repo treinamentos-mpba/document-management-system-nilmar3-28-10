@@ -1,3 +1,4 @@
+const fs = require('node:fs/promises');
 const path = require('node:path');
 const { storageDirectory } = require('../config/storage');
 const documents = new Map();
@@ -21,4 +22,8 @@ function getFilePath(document) {
   return path.join(storageDirectory, document.storageName);
 }
 
-module.exports = { create, findAll, findById, getFilePath };
+function removeStoredFile(storageName) {
+  return fs.unlink(path.join(storageDirectory, storageName));
+}
+
+module.exports = { create, findAll, findById, getFilePath, removeStoredFile };
