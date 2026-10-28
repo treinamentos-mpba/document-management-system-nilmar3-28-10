@@ -39,15 +39,16 @@ export default function UploadComponent({ onUploadComplete, onError }) {
       <form onSubmit={handleUpload}>
         <label
           className={`upload-zone${isDragging ? ' is-dragging' : ''}${selectedFile ? ' has-file' : ''}`}
+          aria-disabled={isUploading}
           onDragOver={(event) => {
             event.preventDefault();
-            setIsDragging(true);
+            if (!isUploading) setIsDragging(true);
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={(event) => {
             event.preventDefault();
             setIsDragging(false);
-            chooseFile(event.dataTransfer.files[0]);
+            if (!isUploading) chooseFile(event.dataTransfer.files[0]);
           }}
         >
           <span className="upload-symbol" aria-hidden="true">+</span>
@@ -60,6 +61,7 @@ export default function UploadComponent({ onUploadComplete, onError }) {
             key={selectedFile ? `${selectedFile.name}-${selectedFile.size}` : 'empty'}
             className="visually-hidden"
             type="file"
+            disabled={isUploading}
             onChange={(event) => chooseFile(event.target.files[0])}
           />
         </label>

@@ -26,6 +26,10 @@ function getDocumentPath(document) {
   return documentRepository.getFilePath(document);
 }
 
+function removeStoredFile(storageName) {
+  return documentRepository.removeStoredFile(storageName);
+}
+
 function toPublicDocument(document) {
   const { storageName, ...publicDocument } = document;
   return publicDocument;
@@ -36,5 +40,6 @@ module.exports = {
   listDocuments,
   findDocument,
   getDocumentPath,
+  removeStoredFile,
   toPublicDocument,
 };
