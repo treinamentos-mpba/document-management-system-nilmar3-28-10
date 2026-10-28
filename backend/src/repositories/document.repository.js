@@ -1,6 +1,5 @@
 const path = require('node:path');
-
-const storageDirectory = path.resolve(__dirname, '../../storage');
+const { storageDirectory } = require('../config/storage');
 const documents = new Map();
 
 function create(document) {
@@ -22,4 +21,4 @@ function getFilePath(document) {
   return path.join(storageDirectory, document.storageName);
 }
 
-module.exports = { create, findAll, findById, getFilePath, storageDirectory };
+module.exports = { create, findAll, findById, getFilePath };
